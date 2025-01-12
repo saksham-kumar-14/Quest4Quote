@@ -1,12 +1,18 @@
-import './App.css'
-import BuyerDashboard from './components/buyer-dashboard/buyer-dashboard.tsx'
+import React from 'react';
+import { Routes, Route, BrowserRouter } from 'react-router-dom';
+import { AuthProvider } from './Context/AuthContext';
+import Dashboard from './components/UnAuthLandingPage/dashboard';
 
-function App() {
+const App: React.FC = () => {
 
-  return (
-    <>
-      <BuyerDashboard />
-    </>
+  return(
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

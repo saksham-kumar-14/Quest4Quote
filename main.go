@@ -5,18 +5,39 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var VendorsCollection *mongo.Collection
 var BuyersCollection *mongo.Collection
+
+type Buyer struct {
+	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name             string             `json:"name"`
+	Email            string             `json:"email"`
+	OrganizationName string             `json:"organizationName"`
+	PhoneNumber      string             `json:"phoneNumber"`
+	Password         string             `json:"password"`
+}
+
+type Vendor struct {
+	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name             string             `json:"name"`
+	Email            string             `json:"email"`
+	OrganizationName string             `json:"organizationName"`
+	PhoneNumber      string             `json:"phoneNumber"`
+	Password         string             `json:"password"`
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -50,14 +71,18 @@ func main() {
 	app.Use(cors.New())
 
 	// Request Endpoints
-	app.Get("/Vendors", handleGetVendors)
-	app.Get("/Buyers", handleGetBuyers)
-	app.Post("/Vendors", handleCreateVendors)
-	app.Post("/Buyers", handleCreateBuyers)
-	app.Delete("/Vendors/:id", handleVendorDeletion)
-	app.Delete("/Buyers/:id", handleBuyerDeletion)
+	app.Get("/vendors", handleGetVendors)
+	app.Get("/buyers", handleGetBuyers)
+	app.Post("/vendor", handleCreateVendors)
+	app.Post("/buyer", handleCreateBuyers)
+	app.Delete("/vendors/:id", handleVendorDeletion)
+	app.Delete("/buyers/:id", handleBuyerDeletion)
 	app.Post("/updateVendor", handleVendorUpdation)
 	app.Post("/updateBuyer", handleBuyerUpdation)
+	app.Post("/login/vendor", VendorLogin)
+	app.Post("/login/buyer", BuyerLogin)
+	app.Get("/api/login/vendor", VendorLoginApi)
+	app.Get("/api/login/buyer", BuyerLoginApi)
 
 	// listening
 	port := os.Getenv("PORT")
@@ -124,14 +149,6 @@ func handleGetVendors(c *fiber.Ctx) error {
 }
 
 func handleCreateBuyers(c *fiber.Ctx) error {
-	type Buyer struct {
-		ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-		Name             string             `json:"name"`
-		Email            string             `json:"email"`
-		OrganizationName string             `json:"organizationName"`
-		PhoneNumber      string             `json:"phoneNumber"`
-		Password         string             `json:"password"`
-	}
 	buyer := new(Buyer)
 	if err := c.BodyParser(buyer); err != nil {
 		return err
@@ -154,14 +171,6 @@ func handleCreateBuyers(c *fiber.Ctx) error {
 }
 
 func handleCreateVendors(c *fiber.Ctx) error {
-	type Vendor struct {
-		ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-		Name             string             `json:"name"`
-		Email            string             `json:"email"`
-		OrganizationName string             `json:"organizationName"`
-		PhoneNumber      string             `json:"phoneNumber"`
-		Password         string             `json:"password"`
-	}
 	vendor := new(Vendor)
 	if err := c.BodyParser(vendor); err != nil {
 		return err
@@ -264,4 +273,200 @@ func handleBuyerUpdation(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"status": "ok", "updated": true})
+}
+
+func VendorLogin(c *fiber.Ctx) error {
+
+	type loginCreds struct {
+		Email string `json:"email"`
+	}
+
+	type Password struct {
+		Password string `json:"password"`
+	}
+
+	creds := new(loginCreds)
+	if err := c.BodyParser(creds); err != nil {
+		return err
+	}
+
+	pwd := new(Password)
+	if err := c.BodyParser(pwd); err != nil {
+		return err
+	}
+
+	var result Vendor
+	err := VendorsCollection.FindOne(context.Background(), creds).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(400).JSON(fiber.Map{"error": "No such Vendor found"})
+		}
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+
+	bytePwd := []byte(pwd.Password)
+	hashedPassword := []byte(result.Password)
+	err = bcrypt.CompareHashAndPassword(hashedPassword, bytePwd)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"error": "No such Vendor found"})
+	}
+
+	// implementing JSON Web Tokens
+	err = godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+	secretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": result.Email,
+		"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "ok", "token": tokenString})
+}
+
+func BuyerLogin(c *fiber.Ctx) error {
+
+	type loginCreds struct {
+		Email string `json:"email"`
+	}
+
+	type Password struct {
+		Password string `json:"password"`
+	}
+
+	creds := new(loginCreds)
+	if err := c.BodyParser(creds); err != nil {
+		return err
+	}
+
+	pwd := new(Password)
+	if err := c.BodyParser(pwd); err != nil {
+		return err
+	}
+
+	var result Buyer
+	err := BuyersCollection.FindOne(context.Background(), creds).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(400).JSON(fiber.Map{"error": "No such Buyer found"})
+		}
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+
+	bytePwd := []byte(pwd.Password)
+	hashedPassword := []byte(result.Password)
+	err = bcrypt.CompareHashAndPassword(hashedPassword, bytePwd)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(400).JSON(fiber.Map{"error": "No such Buyer found"})
+	}
+
+	// implementing JSON Web Tokens
+	err = godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+	secretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"email": result.Email,
+		"exp":   time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+
+	tokenString, err := token.SignedString(secretKey)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "ok", "token": tokenString})
+}
+
+func VendorLoginApi(c *fiber.Ctx) error {
+	// implementing JSON Web Tokens
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+	secretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	token := c.Get("token")
+	tokenForm, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid Token"})
+	}
+
+	if claims, ok := tokenForm.Claims.(jwt.MapClaims); ok && tokenForm.Valid {
+
+		email := claims["email"].(string)
+
+		var result Vendor
+		err := VendorsCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&result)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return c.Status(400).JSON(fiber.Map{"error": "No such vendor found"})
+			}
+			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+		}
+
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "vendor"})
+
+	}
+
+	return c.Status(400).JSON(fiber.Map{"error": "Invalid Token"})
+}
+
+func BuyerLoginApi(c *fiber.Ctx) error {
+	// implementing JSON Web Tokens
+	err := godotenv.Load(".env")
+	if err != nil {
+		fmt.Println("Error loading .env file")
+		return c.Status(500).JSON(fiber.Map{"error": "Internal server error"})
+	}
+	secretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	token := c.Get("token")
+	tokenForm, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return secretKey, nil
+	})
+
+	if err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid Token"})
+	}
+
+	if claims, ok := tokenForm.Claims.(jwt.MapClaims); ok && tokenForm.Valid {
+
+		email := claims["email"].(string)
+
+		var result Buyer
+		err := BuyersCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&result)
+		if err != nil {
+			if err == mongo.ErrNoDocuments {
+				return c.Status(400).JSON(fiber.Map{"error": "No such buyer found"})
+			}
+			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+		}
+
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "buyer"})
+
+	}
+
+	return c.Status(400).JSON(fiber.Map{"error": "Invalid Token"})
 }
