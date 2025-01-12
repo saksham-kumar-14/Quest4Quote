@@ -1,9 +1,8 @@
 import React from 'react';
-import './buyer-header.css';
 
 const BuyerHeader: React.FC = () => {
     return (
-        <header className="buyer-header"></header>
+        <header className="h-72 bg-[#090D11] -z-10 fixed top-0 left-0 w-full"></header>
         
     );
 };
