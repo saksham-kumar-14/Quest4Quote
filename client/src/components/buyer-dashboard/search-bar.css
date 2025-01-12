@@ -1,0 +1,38 @@
+.search-bar{
+    margin: auto;
+    width: fit-content;
+    background-color: #fff;
+    height: 40px;
+    border-radius: 40px;
+    margin-top: 40px;
+}
+
+.search-bar input{
+    vertical-align: middle;
+    border: none;
+    height: 40px;
+    width: 200px;
+    border-radius: 40px;
+    padding: 0 20px;
+    font-size: 16px;
+    color: #333;
+    background-color: transparent;
+    outline: none;
+}
+
+.search-bar button{
+    border: none;
+    background-color: transparent;
+    height: 40px;
+    width: 40px;
+    border-radius: 40px;
+    cursor: pointer;
+    outline: none;
+    vertical-align: middle;
+}
+
+.search-bar button img{
+    vertical-align: middles;
+    width: 20px;
+    height: 20px;
+}

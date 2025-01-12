@@ -1,0 +1,10 @@
+.buyer-header{
+    background-color: #0A0D11;
+    height: 200px;
+    margin: 0;
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
