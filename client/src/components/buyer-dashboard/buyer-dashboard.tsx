@@ -7,7 +7,7 @@ const BuyerDashboard: React.FC = () => {
   return (
     <>
     <BuyerHeader />
-    <Navbar />
+    <Navbar list={['Dashboard', 'RFQ management', 'Search Vendors', 'Compare Quotes']} />
     <Search />
     <BasicDetails />
     </>

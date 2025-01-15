@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './Context/AuthContext';
-import Dashboard from './components/UnAuthLandingPage/dashboard';
+import Dashboard from './components/global/dashboard';
 
 const App: React.FC = () => {
 
@@ -13,6 +13,7 @@ const App: React.FC = () => {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+
   )
 }
 
