@@ -89,7 +89,7 @@ const Register:React.FC = () => {
                 placeholder="Phone Number" />
             <button
             onClick={async() => {
-                if(email.length < 5 || password.length < 4 || orgName.length < 5 || phone.length != 10){
+                if(email.length < 5 || password.length < 4 || orgName.length < 2 || phone.length != 10){
                     alert('Invalid input or Password is too short!');
                     return;
                 }

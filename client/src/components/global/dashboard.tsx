@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import Login from "../UnAuthLandingPage/login";
 import Register from "../UnAuthLandingPage/register";
+import Navbar from "../UnAuthLandingPage/navbar";
+import Display from "../UnAuthLandingPage/display";
 
 const Dashboard: React.FC = () => {
     
@@ -27,20 +29,11 @@ const Dashboard: React.FC = () => {
 
     return(
         <div>
-            <h1>Dashboard</h1>
 
             {!isLoggedIn &&
                 <div>
-                    <button
-                        onClick={() => setShow("login")}
-                    >
-                        Login
-                    </button>
-                    <button
-                        onClick={() => setShow("register")}
-                    >
-                        Register
-                    </button>
+                    <Navbar setShow = {setShow} />
+                    <Display />
                 </div>
             }
 
@@ -55,8 +48,15 @@ const Dashboard: React.FC = () => {
                 </div>
             }
 
-            {show === "login" && <Login login={login} />}
-            {show === "register" && <Register />}
+            {show === "login" && 
+            <div className="w-[100vw] h-[100vh] absolute top-0 left-0">
+                <Login login={login} />
+            </div>}
+            {show === "register" && 
+            <div className="w-[100vw] h-[100vh] absolute top-0 left-0">
+                <Register />
+            </div>
+            }
             
         </div>
     )
