@@ -1,7 +1,7 @@
 const BasicDetails: React.FC = () => {
   return (
     <>
-        <div className="grid-rows-2 h-[500px] bg-nones w-4/5 -my-16 mx-auto rounded-t-[30pxs] font-poppins">
+        <div className="grid-rows-2 h-[400px] bg-nones w-4/5 -mt-16 mb-0 mx-auto rounded-t-[30pxs] font-poppins">
             <div className="grid grid-rows-2 h-full gap-2.5 p-3">
             <div className="grid grid-cols-[200px_1fr] gap-2.5">
                 <div className="col-span-1 border-[5px] border-[#6AFAA8] rounded-tl-[30px] p-5 bg-[#EBFCE3]">

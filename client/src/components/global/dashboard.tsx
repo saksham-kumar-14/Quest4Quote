@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
-import Login from "./login";
-import Register from "./register";
+import Login from "../UnAuthLandingPage/login";
+import Register from "../UnAuthLandingPage/register";
 
 const Dashboard: React.FC = () => {
     

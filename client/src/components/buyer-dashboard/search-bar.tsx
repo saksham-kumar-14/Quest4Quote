@@ -2,7 +2,7 @@ import React from 'react';
 
 const SearchBar: React.FC = () => {
     return (
-        <form className="bg-white mx-auto w-fit h-10 rounded-full flex items-center px-4 my-24 z-10">
+        <form className="bg-white mx-auto w-fit h-10 rounded-full flex items-center px-4 my-[75px] z-10">
             <button type="submit" className="w-6 h-6" onClick={(e) => e.preventDefault()}>
             <img src="/src/assets/buyer-dashboard/search.svg" alt=""/>
             </button>
