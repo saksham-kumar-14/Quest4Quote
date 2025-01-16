@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer: React.FC = () => {
     return (
-        <div className="flex justify-between px-4 h-[200px] bg-[#0A0D11] text-[#6AFAAB] -z-10 -mt-[150px] items-end pb-[15px]">
+        <div className="flex justify-between px-4 h-[200px] bg-[#0A0D11] text-[#6AFAAB] -z-10  items-end pb-[15px] -mt-[150px]" style={{zIndex: -10}}>
             <div className="text-left">
                 <p>&copy; Copyrights 2025, Quest4Quote | All rights reserved</p>
             </div>

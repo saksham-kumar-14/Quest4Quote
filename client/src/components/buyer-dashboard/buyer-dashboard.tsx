@@ -1,4 +1,4 @@
-import BuyerHeader from './buyer-header.tsx'
+import BuyerHeader from '../global/header.tsx'
 import Search from './search-bar.tsx';
 import Navbar from '../global/navbar-authorised.tsx';
 import BasicDetails from './buyer-basic-details.tsx';
