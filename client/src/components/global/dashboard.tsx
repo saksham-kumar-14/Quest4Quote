@@ -4,6 +4,7 @@ import Login from "../UnAuthLandingPage/login";
 import Register from "../UnAuthLandingPage/register";
 import Navbar from "../UnAuthLandingPage/navbar";
 import Display from "../UnAuthLandingPage/display";
+import BuyerDashboard from "../buyer-dashboard/buyer-dashboard";
 
 const Dashboard: React.FC = () => {
     
@@ -15,17 +16,7 @@ const Dashboard: React.FC = () => {
         logout,
         deleteUser
     } = useAuth();
-    const [show, setShow] = useState("");
-
-    async function handleDeletion(){
-        await deleteUser();
-        window.location.reload();
-    }
-
-    function handleLogout(){
-        logout();
-        window.location.reload();
-    }
+    const [show, setShow] = useState(""); 
 
     useEffect(() => {
         if(show == 'login' || show == 'register'){
@@ -47,12 +38,8 @@ const Dashboard: React.FC = () => {
 
             {isLoggedIn && 
                 <div>
-                    <button onClick={handleDeletion}>
-                        Delete Account
-                    </button>
-                    <button onClick={handleLogout}>
-                        Logout
-                    </button>
+                    {localStorage.getItem("endPt") === 'buyer' && <BuyerDashboard />}
+                    {localStorage.getItem("enPt") === 'vendor' && <></>}
                 </div>
             }
 

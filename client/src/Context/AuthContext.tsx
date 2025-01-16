@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = (props) => {
     }
 
     const deleteUser = async (id: string, endPt: string) => {
-        const res = await axios.delete(`http://localhost:3001/user/${id}`);
+        const res = await axios.delete(`http://localhost:3001/${endPt}/${id}`);
         const data = await res.data;
         console.log(data);
         
