@@ -6,3 +6,15 @@ body{
     margin: 0;
     /* font-family: poppins; */
 }
+
+input{
+    width: 50vw;
+    outline: none;
+    border: solid #6afaa8 2px;
+    border-radius: 15px;
+    padding: 5px 12px;
+}
+
+.no-scroll {
+    overflow: hidden;
+}

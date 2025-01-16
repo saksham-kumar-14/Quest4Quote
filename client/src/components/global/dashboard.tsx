@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../Context/AuthContext";
 import Login from "../UnAuthLandingPage/login";
 import Register from "../UnAuthLandingPage/register";
@@ -27,6 +27,14 @@ const Dashboard: React.FC = () => {
         window.location.reload();
     }
 
+    useEffect(() => {
+        if(show == 'login' || show == 'register'){
+            document.body.classList.add('no-scroll');
+        }else{
+            document.body.classList.remove('no-scroll');
+        }
+    }, [show]);
+
     return(
         <div>
 
@@ -49,15 +57,15 @@ const Dashboard: React.FC = () => {
             }
 
             {show === "login" && 
-            <div className="w-[100vw] h-[100vh] absolute top-0 left-0">
-                <Login login={login} />
+            <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-[rgba(100,100,100,0.6)] flex items-center justify-center">
+                <Login setShow={setShow} login={login} />
             </div>}
             {show === "register" && 
-            <div className="w-[100vw] h-[100vh] absolute top-0 left-0">
-                <Register />
+            <div className="w-[100vw] h-[100vh] absolute top-0 left-0 bg-[rgba(100,100,100,0.6)] flex items-center justify-center">
+                <Register setShow={setShow} />
             </div>
             }
-            
+
         </div>
     )
 }
