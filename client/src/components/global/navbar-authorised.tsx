@@ -1,10 +1,18 @@
 import React from 'react';
 import AccountDropdown from './navbar-dropdown';
 
+interface User{
+    email: string,
+    type: string,
+    id: string,
+    organizationName: string,
+    phone: string
+}
+
 interface props{
     list: string[]
     deleteUser: Function
-    user: JSON
+    user: User
 }
 
 const Navbar: React.FC<props> = ({list, deleteUser, user}) => {
