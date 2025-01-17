@@ -6,8 +6,7 @@ import AddDetails from "./add-details";
 
 const CreateRFQ: React.FC = () => {
   return (
-    // <div className="p-1 h-fit w-4/6 bg-[#6AFAA8] min-h-screen z-20 mt-[80px] mx-auto rounded-[11px]">
-      <div className=" relative shadow-md max-w-6xl px-0 w-5/6 border-4 border-[#6AFAA8] h-fit bg-white min-h-screen z-20 mt-[80px] mx-auto rounded-[22px]">     
+      <div className=" relative shadow-md max-w-6xl px-0 w-5/6 border-4 border-[#6AFAA8] h-fit bg-white min-h-screen mt-[80px] mx-auto rounded-[22px]">     
         <TabBar />
         <Table />
         <Terms />
@@ -18,7 +17,6 @@ const CreateRFQ: React.FC = () => {
           </button>
         </div>
       </div>
-    // </div>
   );
 };
 
