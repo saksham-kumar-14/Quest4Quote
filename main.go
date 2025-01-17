@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/websocket/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,9 +20,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var VendorsCollection *mongo.Collection
-var BuyersCollection *mongo.Collection
-var ProductCollection *mongo.Collection
+var (
+	VendorsCollection *mongo.Collection
+	BuyersCollection  *mongo.Collection
+	ProductCollection *mongo.Collection
+	ctx               = context.Background()
+)
 
 type Buyer struct {
 	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
@@ -47,6 +52,24 @@ type Product struct {
 	VendorNames []string           `json:"VendorNames"`
 }
 
+// websockets stuff
+type Message struct {
+	SenderID    string `json:"sender_id"`
+	RecipientID string `json:"recipient_id"`
+	Content     string `json:"content"`
+	Timestamp   int64  `json:"timestamp"`
+}
+
+type ChatClient struct {
+	UserID     string
+	Type       string
+	Connection *websocket.Conn
+}
+
+var chatClients = make(map[string]*websocket.Conn)
+var chatClientsLock = sync.Mutex{}
+var broadcast = make(chan Message)
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -56,15 +79,15 @@ func main() {
 	// Loading mongodb uri
 	MONGODB_URI := os.Getenv("MONGODB_URI")
 	clientOptions := options.Client().ApplyURI(MONGODB_URI)
-	client, err := mongo.Connect(context.Background(), clientOptions)
+	client, err := mongo.Connect(ctx, clientOptions)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	defer client.Disconnect(context.Background())
+	defer client.Disconnect(ctx)
 
-	err = client.Ping(context.Background(), nil)
+	err = client.Ping(ctx, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,9 +118,67 @@ func main() {
 	app.Get("/products", handleGetProducts)
 	app.Get("/vendor/:id", handleGetSpecificVendor)
 
+	// websockets endpoint
+	app.Get("/ws/:user_type/:user_id", websocket.New(handleWebSocketConnection))
+
+	go handleBroadcast()
+
 	// listening
 	port := os.Getenv("PORT")
 	log.Fatal(app.Listen("0.0.0.0:" + port))
+
+}
+
+func handleBroadcast() {
+	for {
+		// Wait for a message on the broadcast channel
+		msg := <-broadcast
+
+		chatClientsLock.Lock()
+		recipientConn, exists := chatClients[msg.RecipientID]
+		chatClientsLock.Unlock()
+
+		if exists {
+			// Send the message to the recipient
+			err := recipientConn.WriteJSON(msg)
+			if err != nil {
+				log.Printf("Write error to user %s: %v", msg.RecipientID, err)
+				chatClientsLock.Lock()
+				recipientConn.Close()
+				delete(chatClients, msg.RecipientID)
+				chatClientsLock.Unlock()
+			}
+		} else {
+			log.Printf("User %s is not connected", msg.RecipientID)
+		}
+	}
+}
+
+func handleWebSocketConnection(c *websocket.Conn) {
+	//userType := c.Params("user_type")
+	userId := c.Params("user_id")
+
+	chatClientsLock.Lock()
+	chatClients[userId] = c
+	chatClientsLock.Unlock()
+
+	defer func() {
+		chatClientsLock.Lock()
+		delete(chatClients, userId)
+		chatClientsLock.Unlock()
+		c.Close()
+	}()
+
+	for {
+		var msg Message
+		if err := c.ReadJSON(&msg); err != nil {
+			log.Printf("Read error from user %s: %v", userId, err)
+			break
+		}
+
+		msg.SenderID = userId
+		broadcast <- msg
+	}
 
 }
 
@@ -113,7 +194,7 @@ func handleGetSpecificVendor(c *fiber.Ctx) error {
 	}
 
 	var result Vendor
-	err = VendorsCollection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&result)
+	err = VendorsCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
@@ -135,13 +216,13 @@ func handleGetSpecificVendor(c *fiber.Ctx) error {
 func handleGetProducts(c *fiber.Ctx) error {
 	var products []Product
 
-	cursor, err := ProductCollection.Find(context.Background(), bson.M{})
+	cursor, err := ProductCollection.Find(ctx, bson.M{})
 	if err != nil {
 		return err
 	}
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var product Product
 		if err := cursor.Decode(&product); err != nil {
 			return err
@@ -163,14 +244,14 @@ func handleGetBuyers(c *fiber.Ctx) error {
 
 	var users []BuyerApi
 
-	cursor, err := BuyersCollection.Find(context.Background(), bson.M{})
+	cursor, err := BuyersCollection.Find(ctx, bson.M{})
 	if err != nil {
 		return err
 	}
 
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var user BuyerApi
 		if err := cursor.Decode(&user); err != nil {
 			return err
@@ -192,14 +273,14 @@ func handleGetVendors(c *fiber.Ctx) error {
 
 	var users []VendorApi
 
-	cursor, err := VendorsCollection.Find(context.Background(), bson.M{})
+	cursor, err := VendorsCollection.Find(ctx, bson.M{})
 	if err != nil {
 		return err
 	}
 
-	defer cursor.Close(context.Background())
+	defer cursor.Close(ctx)
 
-	for cursor.Next(context.Background()) {
+	for cursor.Next(ctx) {
 		var user VendorApi
 		if err := cursor.Decode(&user); err != nil {
 			return err
@@ -222,7 +303,7 @@ func handleCreateBuyers(c *fiber.Ctx) error {
 		})
 	}
 
-	insRes, err := BuyersCollection.InsertOne(context.Background(), buyer)
+	insRes, err := BuyersCollection.InsertOne(ctx, buyer)
 	if err != nil {
 		return err
 	}
@@ -244,7 +325,7 @@ func handleCreateVendors(c *fiber.Ctx) error {
 		})
 	}
 
-	insRes, err := VendorsCollection.InsertOne(context.Background(), vendor)
+	insRes, err := VendorsCollection.InsertOne(ctx, vendor)
 	if err != nil {
 		return err
 	}
@@ -261,7 +342,7 @@ func handleVendorDeletion(c *fiber.Ctx) error {
 	}
 
 	filter := bson.M{"_id": objectId}
-	_, err = VendorsCollection.DeleteOne(context.Background(), filter)
+	_, err = VendorsCollection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -277,7 +358,7 @@ func handleBuyerDeletion(c *fiber.Ctx) error {
 	}
 
 	filter := bson.M{"_id": objectId}
-	_, err = BuyersCollection.DeleteOne(context.Background(), filter)
+	_, err = BuyersCollection.DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -303,7 +384,7 @@ func handleVendorUpdation(c *fiber.Ctx) error {
 
 	filter := bson.M{"_id": body.ID}
 	update := bson.M{"$set": bson.M{"name": body.Name, "email": body.Email, "phoneNumber": body.PhoneNumber}}
-	_, err := VendorsCollection.UpdateOne(context.Background(), filter, update)
+	_, err := VendorsCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err})
 	}
@@ -329,7 +410,7 @@ func handleBuyerUpdation(c *fiber.Ctx) error {
 
 	filter := bson.M{"_id": body.ID}
 	update := bson.M{"$set": bson.M{"name": body.Name, "email": body.Email, "phoneNumber": body.PhoneNumber}}
-	_, err := BuyersCollection.UpdateOne(context.Background(), filter, update)
+	_, err := BuyersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return c.Status(400).JSON(fiber.Map{"error": err})
 	}
@@ -358,7 +439,7 @@ func VendorLogin(c *fiber.Ctx) error {
 	}
 
 	var result Vendor
-	err := VendorsCollection.FindOne(context.Background(), creds).Decode(&result)
+	err := VendorsCollection.FindOne(ctx, creds).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(400).JSON(fiber.Map{"error": "No such Vendor found"})
@@ -418,7 +499,7 @@ func BuyerLogin(c *fiber.Ctx) error {
 	}
 
 	var result Buyer
-	err := BuyersCollection.FindOne(context.Background(), creds).Decode(&result)
+	err := BuyersCollection.FindOne(ctx, creds).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return c.Status(400).JSON(fiber.Map{"error": "No such Buyer found"})
@@ -480,7 +561,7 @@ func VendorLoginApi(c *fiber.Ctx) error {
 		email := claims["email"].(string)
 
 		var result Vendor
-		err := VendorsCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&result)
+		err := VendorsCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return c.Status(400).JSON(fiber.Map{"error": "No such vendor found"})
@@ -518,7 +599,7 @@ func BuyerLoginApi(c *fiber.Ctx) error {
 		email := claims["email"].(string)
 
 		var result Buyer
-		err := BuyersCollection.FindOne(context.Background(), bson.M{"email": email}).Decode(&result)
+		err := BuyersCollection.FindOne(ctx, bson.M{"email": email}).Decode(&result)
 		if err != nil {
 			if err == mongo.ErrNoDocuments {
 				return c.Status(400).JSON(fiber.Map{"error": "No such buyer found"})
