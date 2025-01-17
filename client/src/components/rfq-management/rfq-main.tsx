@@ -9,7 +9,7 @@ const RFQManagement: React.FC = () => {
     <Navbar list={['Dashboard', 'RFQ management', 'Search Vendors', 'Compare Quotes']} />
     <Header />
     <CreateRFQ />
-    {/* <Footer /> */}
+    <Footer />
     </>
   )
 }
