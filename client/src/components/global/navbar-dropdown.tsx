@@ -48,7 +48,7 @@ return (
                 className="block px-4 py-2 h-[50px] text-[#6AFAA8] bg-[#090D11] font-medium text-sm hover:text-white cursor-pointer">Logout</a>
                 <a 
                 onClick={handleDeletion}
-                className="block px-4 py-2 h-[50px] text-[#090D11] bg-red-400 font-medium text-sm hover:text-white rounded-b-[25px] cursor-pointer">Delete Account</a>
+                className="block px-4 py-[14px] h-[50px] text-[#090D11] bg-red-400 font-medium text-sm hover:text-white rounded-b-[25px] cursor-pointer">Delete Account</a>
             </div>
         )}
     </div>

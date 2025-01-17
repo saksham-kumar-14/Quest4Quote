@@ -1,17 +1,17 @@
 import Navbar from '../global/navbar-authorised.tsx';
 import Footer from '../global/footer.tsx';
 import Header from '../global/header.tsx';
-import ManageQuotes from './main.tsx';
+import CompareQuotes from './compare-container.tsx';
 
-const Quotes: React.FC = () => {
+const Compare: React.FC = () => {
   return (
     <>
     <Navbar list={['Dashboard', 'RFQ management', 'Search Vendors', 'Compare Quotes']} />
     <Header />
-    <ManageQuotes />
+    <CompareQuotes />
     <Footer />
     </>
   )
 }
 
-export default Quotes;
+export default Compare;
