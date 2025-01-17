@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useAuth } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import BuyerChat from "../buyer-dashboard/buyerChat";
 
 interface Vendor{
     id: string,
@@ -19,6 +20,7 @@ const VendorDashboard:React.FC = () => {
     const { user } = useAuth();
     const { id } = useParams<{id : string}>();
     const [vendor, setVendor] = useState<Vendor | null>();
+    const [found, setFound] = useState<Boolean>(false);
 
     useEffect(() => {
 
@@ -29,27 +31,18 @@ const VendorDashboard:React.FC = () => {
                 }
             });
             const data = await res.data;
-
-            // if(data == null || data.error == "true") navigate('/');
-            // else {
-            //     alert(data.id + data.name + data.email + data.PhoneNumber + data.OrganizationName)
-            //     setVendor({
-            //         id: data.id,
-            //         name: data.name,
-            //         email: data.email,
-            //         phone: data.PhoneNumber,
-            //         OrganizationName: data.OrganizationName
-            //     });
-            // }
+            if(data == null || data.found == 'false') setFound(false);
+            else{
+                setFound(true);
+                setVendor({
+                    id: data.id,
+                    name: data.name,
+                    phone: data.phone,
+                    OrganizationName: data.OrganizationName,
+                    email: data.email
+                })
+            }
         }
-
-        if(user != null && user.type != null){
-            if(user.type == 'buyer'){
-
-            }else if(user.type == 'vendor'){
-
-            }else navigate("/");
-        }else navigate("/");
 
         operateId()
     }, [user, id]);
@@ -57,9 +50,16 @@ const VendorDashboard:React.FC = () => {
     return(
         <div>
             {vendor != null &&
+            <div className="grid grid-cols-2">
                 <div>
                     <p>Name: {vendor.name}</p>
+                    <p>Email: {vendor.email}</p>
+                    <p>Phone: {vendor.phone}</p>
+                    <p>Organization Name: {vendor.OrganizationName}</p>
                 </div>
+
+                <BuyerChat/>
+            </div>
             }
 
 

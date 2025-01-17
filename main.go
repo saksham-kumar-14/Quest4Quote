@@ -104,17 +104,32 @@ func main() {
 func handleGetSpecificVendor(c *fiber.Ctx) error {
 	id := c.Get("id")
 
-	var result Vendor
-	err := VendorsCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&result)
+	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return c.Status(400).JSON(fiber.Map{"error": "No such vendor found"})
-		}
-		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"found": "false",
+			"error": "Invalid ID format",
+		})
 	}
 
-	return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "name": result.Name,
+	var result Vendor
+	err = VendorsCollection.FindOne(context.Background(), bson.M{"_id": objectID}).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"found": "false",
+				"error": "User not found",
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"found": "false",
+			"error": "Failed to fetch user",
+		})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"found": "true", "id": result.ID, "name": result.Name,
 		"phone": result.PhoneNumber, "OrganizationName": result.OrganizationName, "email": result.Email})
+
 }
 
 func handleGetProducts(c *fiber.Ctx) error {
