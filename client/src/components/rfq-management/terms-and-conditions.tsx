@@ -4,20 +4,20 @@ const Terms: React.FC = () => {
   return (
     <div className="p-4">
           <h3 className="font-semibold mb-2">Terms and Conditions:</h3>
-          <div className="space-y-2">
-            <label className="block">
-              <input type="checkbox" className="mr-2" />
-              First term to be displayed here
-            </label>
-            <label className="block">
-              <input type="checkbox" className="mr-2" />
-              Second term to be displayed here
-            </label>
-            <label className="block">
-              <input type="checkbox" className="mr-2" />
-              Third term to be displayed here
-            </label>
-          </div>
+            <ul className="list-none space-y-2 text-left">
+              <li className="flex items-center">
+                <input type="checkbox" className="mr-2 w-[15px]" />
+                <span>First term to be displayed here</span>
+              </li>
+              <li className="flex items-center">
+                <input type="checkbox" className="mr-2 w-[15px]" />
+                <span>Second term to be displayed here</span>
+              </li>
+              <li className="flex items-center">
+                <input type="checkbox" className="mr-2 w-[15px]" />
+                <span>Third term to be displayed here</span>
+              </li>
+            </ul>
 
           {/* Additional Terms */}
           <textarea
