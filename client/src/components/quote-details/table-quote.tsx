@@ -5,71 +5,95 @@ const Table: React.FC = () => {
   return (
     <div className="p-0 border-b border-gray-300">
       <TabBarQuote />
-      <div className="text-6xl text-center font-semibold mt-[5px] mb-[15px]">Quote Details</div>
-      <table className="w-full table-fixed">
-      <thead>
-        <tr className="text-left text-sm font-medium bg-gray-100">
-        <th className="w-1/12 p-2 border border-gray-300 text-center">Product Name</th>
-        <th className="w-3/12 p-2 border border-gray-300 text-center">Size, Specification and Quantity</th>
-        <th className="w-2/12 p-2 border border-gray-300 text-center">TDS</th>
-        <th className="w-2/12 p-2 border border-gray-300 text-center">QAP</th>
-        <th className="w-2/12 p-2 border border-gray-300 text-center">Comments</th>
-        <th className="w-1/12 p-2 border border-gray-300 text-center">Selected Vendors</th>
-        <th className="w-1/12 p-2 border border-gray-300 text-centerss">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr className="text-sm border-t border-gray-300 text-center">
-            <td className="p-2 border border-gray-300">Steel</td>
-            <td className="p-2 border border-gray-300">
-              <div className="flex gap-2">
-                <input type="text" placeholder="Size" className="border rounded px-2 py-1 w-1/3" />
-                <input type="text" placeholder="Specifications" className="border rounded px-2 py-1 w-1/3" />
-                <input type="text" placeholder="Quantity" className="border rounded px-2 py-1 w-1/3" />
+      <div className="text-6xl text-center font-semibold mt-[5px] mb-[15px] w-full">Quote Details</div>
+      <div className=" table-fixed bg-slate-50 w-[100.01%] ">
+        <div>
+          <div className="text-left text-sm font-medium bg-[#1AA566] grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
+            <th className="p-2 border border-gray-300 border-l-0 text-center text-[11px]">S. No.</th>
+            <th className="p-2 border border-gray-300 text-center">Description</th>
+            <th className="p-2 border border-gray-300 text-center">Qty.</th>
+            <th className="p-2 border border-gray-300 text-center">Status</th>
+            <th className="p-2 border border-gray-300 border-r-0 text-center">Price</th>
+          </div>
+        </div>
+        <div className="w-full">
+            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
+              <div className="p-2 ">1. </div>
+              <div className="p-2 border-l ">Product-1</div>
+              <div className="p-2 border-l ">10</div>
+              <div className="p-2 border-l ">Accepted</div>
+              <div className="p-2 border-l  grid grid-cols-[1fr_20px]">
+                12500
+                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
               </div>
-              OR &nbsp;
-              <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] mt-2">Upload</button>
-            </td>
-              <td className="p-2 border border-gray-300">
-                <div className="flex gap-2 text-[10px]">
-                  <input type="checkbox" className="mr-2 w-[15px]" />
-                  <label className="text-[12px] align-middle p-[2px]"><span className="align-middle">Select File</span></label>
-                    <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] text-[10px] h-[30px] align-middle ">View</button>
+            </div>
+            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
+              <div className="p-2 ">2. </div>
+              <div className="p-2 border-l ">Product-2</div>
+              <div className="p-2 border-l ">21</div>
+              <div className="p-2 border-l ">Accepted</div>
+              <div className="p-2 border-l  grid grid-cols-[1fr_20px]">
+                13905
+                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+              </div>
+            </div>
+            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
+              <div className="p-2 ">3. </div>
+              <div className="p-2 border-l ">Product-3</div>
+              <div className="p-2 border-l ">8</div>
+              <div className="p-2 border-l ">Rejected</div>
+              <div className="p-2 border-l  grid grid-cols-[1fr_20px]">
+                25632
+                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+              </div>
+            </div>
+            <div className="text-sm border-t text-center bg-white grid grid-cols-[4fr_2fr_2fr_2fr]">
+              <div className="p-2 border-l">Total</div>
+              <div className="p-2 border-l">39</div>
+              <div className="p-2 border-l w-[99%] grid grid-cols-[1fr_20px]">
+              2
+              <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+              </div>
+              <div className="p-2 border-l grid grid-cols-[1fr_20px]">
+                52037
+                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+              </div>
+            </div>
+            <div className="text-sm border-t border-white text-center grid grid-cols-[6fr_4fr] text-[#6AFAA8] bg-[#090D11]">
+              <div className="p-2 border-l">Accepted Total</div>
+              <div className="p-0 border-l grid grid-cols-[1fr_36px]">
+                <div className="pt-2">
+                  26405
                 </div>
-                OR
-                <div className="mt-2 text-[10px]">
-                  <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] ml-2 text-[10px] h-[30px]">Upload</button>
+                <div className="bg-[#6AFAA8] h-9 w-9 p-[10px]">
+                  <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
                 </div>
-              </td>
-            <td className="p-2 border border-gray-300">
-              <div className="flex gap-2 text-[10px]">
-                <input type="checkbox" className="mr-2 w-[15px]" />
-                <label className="text-[12px] p-[2px]"><span className="align-middle ">Select File</span></label>
-                  <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] text-[10px] h-[30px] align-middle">View</button>
               </div>
-                OR
-              <div className="mt-2 text-[10px]">
-                <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] text-[10px] h-[30px]">Upload</button>
+            </div>
+            <div className="text-sm border-t  border-white text-center grid grid-cols-[6fr_4fr] text-[#6AFAA8] bg-[#090D11]">
+              <div className="p-2 border-l">Delivery Estimate</div>
+              <div className="p-0 border-l grid grid-cols-[1fr_36px]">
+                <div className="pt-2">
+                  7 Days
+                </div>
+                <div className="bg-[#6AFAA8] h-9 w-9 p-[10px] border-solid border-y-[#090D11]">
+                  <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+                </div>
               </div>
-            
-            </td>
-            <td className="p-2 border border-gray-300">
-              <input type="text" placeholder="Comments" className="border rounded px-2 py-1 w-full" />
-            </td>
-            <td className="p-2 border border-gray-300">
-              <div className="">
-                <button className="bg-[#090D11] text-[#6AFAA8] px-3 py-1 rounded-[10px] h-[80px]">View Selcted Vendors</button>
+            </div>
+            <div className="text-sm border-t text-center grid grid-cols-[6fr_4fr] text-[#6AFAA8] bg-[#090D11]">
+              <div className="p-2 border-l">Quote Status</div>
+              <div className="p-0 border-l grid grid-cols-[1fr_36px]">
+                <div className="pt-2">
+                  Partially accepted
+                </div>
+                <div className="bg-[#6AFAA8] h-9 w-9 p-[10px]">
+                  <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
+                </div>
               </div>
-            </td>
-            <td className="p-2 border border-gray-300">
-              <div className="grid grid-rows-2 gap-2">
-                <button className="bg-[#6AFAA8] text-[#090D11] px-3 py-1 rounded-[20px] border-[1px] border-[#090D11] h-[40px]">Remove</button>
-                <button className="bg-[#090D11] text-[#6AFAA8] rounded-[20px] px-1 -py-1 h-[40px] text-[12px]">Add Variant</button>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-      </table>
+            </div>
+        </div>
+      </div>
     </div>
   );
 }
