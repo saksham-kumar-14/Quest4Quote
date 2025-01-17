@@ -3,9 +3,11 @@ import AccountDropdown from './navbar-dropdown';
 
 interface props{
     list: string[]
+    deleteUser: Function
+    user: JSON
 }
 
-const Navbar: React.FC<props> = ({list}) => {
+const Navbar: React.FC<props> = ({list, deleteUser, user}) => {
     return (
         <nav className="bg-[#090D11] p-3 text-white text-lg font-bold z-2 fixed top-0 left-0 w-full">
             <div className="flex items-center">
@@ -17,7 +19,7 @@ const Navbar: React.FC<props> = ({list}) => {
                     return <a href="#" className="flex-1 text-center bg-[#090D11] text-[#6AFAA8] hover:text-white  font-[400]">{e}</a>
                 })}
             </div>
-            <AccountDropdown />
+            <AccountDropdown deleteUser={deleteUser} user={user} />
             </div>
         </nav>
     );
