@@ -20,6 +20,7 @@ import (
 
 var VendorsCollection *mongo.Collection
 var BuyersCollection *mongo.Collection
+var ProductCollection *mongo.Collection
 
 type Buyer struct {
 	ID               primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
@@ -37,6 +38,13 @@ type Vendor struct {
 	OrganizationName string             `json:"organizationName"`
 	PhoneNumber      string             `json:"phoneNumber"`
 	Password         string             `json:"password"`
+}
+
+type Product struct {
+	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name        string             `json:"name"`
+	VendorIDs   []string           `json:"VendorIDs"`
+	VendorNames []string           `json:"VendorNames"`
 }
 
 func main() {
@@ -65,6 +73,7 @@ func main() {
 
 	BuyersCollection = client.Database("db1").Collection("buyers")
 	VendorsCollection = client.Database("db1").Collection("vendors")
+	ProductCollection = client.Database("db1").Collection("products")
 
 	// initialising app and using cors
 	app := fiber.New()
@@ -83,11 +92,49 @@ func main() {
 	app.Post("/login/buyer", BuyerLogin)
 	app.Get("/api/login/vendor", VendorLoginApi)
 	app.Get("/api/login/buyer", BuyerLoginApi)
+	app.Get("/products", handleGetProducts)
+	app.Get("/vendor/:id", handleGetSpecificVendor)
 
 	// listening
 	port := os.Getenv("PORT")
 	log.Fatal(app.Listen("0.0.0.0:" + port))
 
+}
+
+func handleGetSpecificVendor(c *fiber.Ctx) error {
+	id := c.Get("id")
+
+	var result Vendor
+	err := VendorsCollection.FindOne(context.Background(), bson.M{"_id": id}).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return c.Status(400).JSON(fiber.Map{"error": "No such vendor found"})
+		}
+		return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "name": result.Name,
+		"phone": result.PhoneNumber, "OrganizationName": result.OrganizationName, "email": result.Email})
+}
+
+func handleGetProducts(c *fiber.Ctx) error {
+	var products []Product
+
+	cursor, err := ProductCollection.Find(context.Background(), bson.M{})
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(context.Background())
+
+	for cursor.Next(context.Background()) {
+		var product Product
+		if err := cursor.Decode(&product); err != nil {
+			return err
+		}
+		products = append(products, product)
+	}
+
+	return c.JSON(products)
 }
 
 func handleGetBuyers(c *fiber.Ctx) error {
@@ -426,7 +473,7 @@ func VendorLoginApi(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 		}
 
-		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "vendor"})
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "vendor", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber})
 
 	}
 
@@ -464,7 +511,7 @@ func BuyerLoginApi(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 		}
 
-		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "buyer"})
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "buyer", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber})
 
 	}
 

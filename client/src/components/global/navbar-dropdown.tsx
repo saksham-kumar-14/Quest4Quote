@@ -3,7 +3,10 @@ import { useState } from 'react';
 interface User{
     email: string,
     id: string,
-    type: string
+    type: string,
+    name: string,
+    organizationName: string,
+    phone: string,
 }
 
 interface props{
