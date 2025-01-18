@@ -5,6 +5,7 @@ import Register from "../UnAuthLandingPage/register";
 import Navbar from "../UnAuthLandingPage/navbar";
 import Display from "../UnAuthLandingPage/display";
 import BuyerDashboard from "../buyer-dashboard/buyer-dashboard";
+import VendorDashboard from "../vendor-dashboard/vendorDashboard";
 
 const Dashboard: React.FC = () => {
     
@@ -24,7 +25,9 @@ const Dashboard: React.FC = () => {
         }else{
             document.body.classList.remove('no-scroll');
         }
-    }, [show]);
+
+        if(user === null) setIsLoggedIn(false)
+    }, [show, user]);
 
     return(
         <div>
@@ -38,8 +41,9 @@ const Dashboard: React.FC = () => {
 
             {isLoggedIn && 
                 <div>
-                    {localStorage.getItem("endPt") === 'buyer' && <BuyerDashboard />}
-                    {localStorage.getItem("enPt") === 'vendor' && <></>}
+                    {localStorage.getItem('endPt') == 'buyer' && <BuyerDashboard />}
+                    {localStorage.getItem('endPt') == 'vendor' && <VendorDashboard/>
+                    }
                 </div>
             }
 

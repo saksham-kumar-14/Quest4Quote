@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/websocket/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,6 +41,10 @@ type Vendor struct {
 	OrganizationName string             `json:"organizationName"`
 	PhoneNumber      string             `json:"phoneNumber"`
 	Password         string             `json:"password"`
+	WebsiteUrl       string             `json:"websiteUrl"`
+	MainAddr         string             `json:"mainAddr"`
+	AltAddr          string             `json:"altAddr"`
+	About            string             `json:"about"`
 }
 
 type Product struct {
@@ -51,24 +53,6 @@ type Product struct {
 	VendorIDs   []string           `json:"VendorIDs"`
 	VendorNames []string           `json:"VendorNames"`
 }
-
-// websockets stuff
-type Message struct {
-	SenderID    string `json:"sender_id"`
-	RecipientID string `json:"recipient_id"`
-	Content     string `json:"content"`
-	Timestamp   int64  `json:"timestamp"`
-}
-
-type ChatClient struct {
-	UserID     string
-	Type       string
-	Connection *websocket.Conn
-}
-
-var chatClients = make(map[string]*websocket.Conn)
-var chatClientsLock = sync.Mutex{}
-var broadcast = make(chan Message)
 
 func main() {
 	err := godotenv.Load(".env")
@@ -109,8 +93,8 @@ func main() {
 	app.Post("/buyer", handleCreateBuyers)
 	app.Delete("/vendor/:id", handleVendorDeletion)
 	app.Delete("/buyer/:id", handleBuyerDeletion)
-	app.Post("/updateVendor", handleVendorUpdation)
-	app.Post("/updateBuyer", handleBuyerUpdation)
+	app.Put("/updateVendor/:id", handleVendorUpdation)
+	app.Put("/updateBuyer/:id", handleBuyerUpdation)
 	app.Post("/login/vendor", VendorLogin)
 	app.Post("/login/buyer", BuyerLogin)
 	app.Get("/api/login/vendor", VendorLoginApi)
@@ -118,72 +102,14 @@ func main() {
 	app.Get("/products", handleGetProducts)
 	app.Get("/vendor/:id", handleGetSpecificVendor)
 
-	// websockets endpoint
-	app.Get("/ws/:user_type/:user_id", websocket.New(handleWebSocketConnection))
-
-	go handleBroadcast()
-
 	// listening
 	port := os.Getenv("PORT")
 	log.Fatal(app.Listen("0.0.0.0:" + port))
 
 }
 
-func handleBroadcast() {
-	for {
-		// Wait for a message on the broadcast channel
-		msg := <-broadcast
-
-		chatClientsLock.Lock()
-		recipientConn, exists := chatClients[msg.RecipientID]
-		chatClientsLock.Unlock()
-
-		if exists {
-			// Send the message to the recipient
-			err := recipientConn.WriteJSON(msg)
-			if err != nil {
-				log.Printf("Write error to user %s: %v", msg.RecipientID, err)
-				chatClientsLock.Lock()
-				recipientConn.Close()
-				delete(chatClients, msg.RecipientID)
-				chatClientsLock.Unlock()
-			}
-		} else {
-			log.Printf("User %s is not connected", msg.RecipientID)
-		}
-	}
-}
-
-func handleWebSocketConnection(c *websocket.Conn) {
-	//userType := c.Params("user_type")
-	userId := c.Params("user_id")
-
-	chatClientsLock.Lock()
-	chatClients[userId] = c
-	chatClientsLock.Unlock()
-
-	defer func() {
-		chatClientsLock.Lock()
-		delete(chatClients, userId)
-		chatClientsLock.Unlock()
-		c.Close()
-	}()
-
-	for {
-		var msg Message
-		if err := c.ReadJSON(&msg); err != nil {
-			log.Printf("Read error from user %s: %v", userId, err)
-			break
-		}
-
-		msg.SenderID = userId
-		broadcast <- msg
-	}
-
-}
-
 func handleGetSpecificVendor(c *fiber.Ctx) error {
-	id := c.Get("id")
+	id := c.Params("id")
 
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -367,55 +293,84 @@ func handleBuyerDeletion(c *fiber.Ctx) error {
 }
 
 func handleVendorUpdation(c *fiber.Ctx) error {
+	id := c.Params("id")
 
-	type UpdateReq struct {
-		ID          primitive.ObjectID `json:"id"`
-		Name        string             `json:"name"`
-		Email       string             `json:"email"`
-		PhoneNumber string             `json:"phoneNumber"`
-	}
-
-	var body UpdateReq
-	if err := c.BodyParser(&body); err != nil {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to parse request body",
+			"found": "false",
+			"error": "Invalid ID format",
 		})
 	}
 
-	filter := bson.M{"_id": body.ID}
-	update := bson.M{"$set": bson.M{"name": body.Name, "email": body.Email, "phoneNumber": body.PhoneNumber}}
-	_, err := VendorsCollection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": err})
+	var updateData map[string]interface{}
+	if err := c.BodyParser(&updateData); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"found": "false",
+			"error": "Invalid request body",
+		})
 	}
 
-	return c.Status(200).JSON(fiber.Map{"status": "ok", "updated": true})
+	filter := bson.M{"_id": objectID}
+	update := bson.M{
+		"$set": updateData,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	result, err := VendorsCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"found": "false",
+			"error": "Failed to update user",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"matchedCount":  result.MatchedCount,
+		"modifiedCount": result.ModifiedCount,
+	})
 }
 
 func handleBuyerUpdation(c *fiber.Ctx) error {
 
-	type UpdateReq struct {
-		ID          primitive.ObjectID `json:"id"`
-		Name        string             `json:"name"`
-		Email       string             `json:"email"`
-		PhoneNumber string             `json:"phoneNumber"`
-	}
+	id := c.Params("id")
 
-	var body UpdateReq
-	if err := c.BodyParser(&body); err != nil {
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "Failed to parse request body",
+			"found": "false",
+			"error": "Invalid ID format",
 		})
 	}
 
-	filter := bson.M{"_id": body.ID}
-	update := bson.M{"$set": bson.M{"name": body.Name, "email": body.Email, "phoneNumber": body.PhoneNumber}}
-	_, err := BuyersCollection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": err})
+	var updateData map[string]interface{}
+	if err := c.BodyParser(&updateData); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"found": "false",
+			"error": "Invalid request body",
+		})
 	}
 
-	return c.Status(200).JSON(fiber.Map{"status": "ok", "updated": true})
+	filter := bson.M{"_id": objectID}
+	update := bson.M{
+		"$set": updateData,
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	result, err := VendorsCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"found": "false",
+			"error": "Failed to update user",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"matchedCount":  result.MatchedCount,
+		"modifiedCount": result.ModifiedCount,
+	})
 }
 
 func VendorLogin(c *fiber.Ctx) error {

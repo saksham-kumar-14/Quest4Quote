@@ -47,7 +47,7 @@ const VendorDashboard:React.FC = () => {
             }
         }
 
-        operateId()
+        if(user && user.type == "buyer") operateId();
     }, [user, id]);
 
     return(
