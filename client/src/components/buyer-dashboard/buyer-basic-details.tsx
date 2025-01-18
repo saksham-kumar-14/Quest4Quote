@@ -6,7 +6,8 @@ interface User{
     type: string,
     name: string,
     organizationName: string,
-    phone: string
+    phone: string,
+    about: string
 }
 
 interface props{
@@ -40,6 +41,7 @@ const BasicDetails: React.FC<props> = ({ user })=> {
                     <div style={{color: 'blue', fontSize: '22px'}}>
                         About
                     </div>
+                    <p>{user.about}</p>
                 </div>
             </div>
             </div>

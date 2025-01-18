@@ -32,6 +32,7 @@ type Buyer struct {
 	OrganizationName string             `json:"organizationName"`
 	PhoneNumber      string             `json:"phoneNumber"`
 	Password         string             `json:"password"`
+	About            string             `json:"about"`
 }
 
 type Vendor struct {
@@ -327,9 +328,14 @@ func handleVendorUpdation(c *fiber.Ctx) error {
 		})
 	}
 
+	if result.MatchedCount == 0 || result.ModifiedCount == 0 {
+		return c.JSON(fiber.Map{
+			"found": "false",
+			"error": "not found",
+		})
+	}
 	return c.JSON(fiber.Map{
-		"matchedCount":  result.MatchedCount,
-		"modifiedCount": result.ModifiedCount,
+		"found": "true",
 	})
 }
 
@@ -360,7 +366,7 @@ func handleBuyerUpdation(c *fiber.Ctx) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	result, err := VendorsCollection.UpdateOne(ctx, filter, update)
+	result, err := BuyersCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"found": "false",
@@ -369,6 +375,7 @@ func handleBuyerUpdation(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
+		"found":         "true",
 		"matchedCount":  result.MatchedCount,
 		"modifiedCount": result.ModifiedCount,
 	})
@@ -525,7 +532,7 @@ func VendorLoginApi(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 		}
 
-		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "vendor", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber})
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "vendor", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber, "about": result.About})
 
 	}
 
@@ -563,7 +570,7 @@ func BuyerLoginApi(c *fiber.Ctx) error {
 			return c.Status(500).JSON(fiber.Map{"error": "Internal Server Error"})
 		}
 
-		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "buyer", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber})
+		return c.Status(200).JSON(fiber.Map{"status": "ok", "id": result.ID, "email": result.Email, "type": "buyer", "organizationName": result.OrganizationName, "name": result.Name, "phone": result.PhoneNumber, "about": result.About})
 
 	}
 

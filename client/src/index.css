@@ -6,7 +6,7 @@ body{
     margin: 0;
 }
 
-input{
+textarea, input{
     width: 50vw;
     outline: none;
     border: solid #6afaa8 2px;

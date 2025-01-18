@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import buyerUpdateAccountBox from '../buyer-dashboard/updateAccountBox';
-import vendorUpdateAccountBox from '../vendor-dashboard/updateAccountBox';
+import { useEffect, useState } from 'react';
+import BuyerUpdateAccountBox from '../buyer-dashboard/buyerUpdateAccount';
+import VendorUpdateAccountBox from '../vendor-dashboard/vendorUpdateAccountBox';
 
 interface User{
     email: string,
@@ -18,6 +18,8 @@ interface props{
 
 const AccountDropdown: React.FC<props> = ({deleteUser, user}) => {
     const [isDropdownOpen, setDropdownOpen] = useState(false);
+    const[updationBox, setUpdationBox] = useState("");
+    const [containerClass, setContainerClass] = useState("relative z-10");
 
     const toggleDropdown = () => {
         setDropdownOpen(!isDropdownOpen);
@@ -34,10 +36,21 @@ const AccountDropdown: React.FC<props> = ({deleteUser, user}) => {
         window.location.reload();
     }
 
+    useEffect(()=> {
+        if(updationBox == "buyer" || updationBox == "vendor"){
+            setContainerClass("relative -z-10");
+        }else setContainerClass("relative z-10");
+    }, [updationBox])
+
 return (
     <div>
-    
-    <div className="relative">
+        {updationBox == "buyer" &&
+            <BuyerUpdateAccountBox setUpdationBox={setUpdationBox} />
+        } 
+        {updationBox == "vendor" &&
+            <VendorUpdateAccountBox setUpdationBox={setUpdationBox} />
+        }
+    <div className={containerClass}>
         <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center cursor-pointer" onClick={toggleDropdown}>
             <img src="/src/assets/navbar-authorised/account.png" alt="" className="w-8 h-8" />
         </div>
@@ -54,7 +67,7 @@ return (
                         }else setUpdationBox("vendor")
                     }
                 }}
-                className="block px-4 py-2 h-[50px] text-[#6AFAA8] bg-[#090D11] font-medium text-sm hover:text-white">
+                className="cursor-pointer block px-4 py-2 h-[50px] text-[#6AFAA8] bg-[#090D11] font-medium text-sm hover:text-white">
                     My Account
                 </a>
                 <a href="#" className="block px-4 py-2 h-[50px] text-[#6AFAA8] bg-[#090D11] font-medium text-sm hover:text-white">RFQ Management</a>

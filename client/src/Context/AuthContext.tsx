@@ -10,6 +10,7 @@ interface User{
     name: string,
     organizationName: string,
     phone: string,
+    about: string
 }
 
 interface AuthContextType {
@@ -51,7 +52,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = (props) => {
                     type: data.type,
                     name: data.name,
                     organizationName: data.organizationName,
-                    phone: data.phone
+                    phone: data.phone,
+                    about: data.about
                 });
             }else setIsLoggedIn(false);
         }
