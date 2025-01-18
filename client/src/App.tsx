@@ -7,6 +7,10 @@ import BuyerSearch from './components/buyer-dashboard/buyerSearch';
 import VendorDashboard from './components/vendor-dashboard/vendorDashboard';
 // import Quotes from './components/quote-details/quote-main';
 // import Compare from './components/compare-quotes/compare-main';
+<<<<<<< HEAD
+=======
+// import Search from './components/search-vendors/search-main';
+>>>>>>> 9f830b5b197fa453fab3a7e22502c7d6fc8f35d8
 
 const App: React.FC = () => {
 
@@ -21,6 +25,10 @@ const App: React.FC = () => {
         </Routes>
       </BrowserRouter>
     </AuthProvider>
+<<<<<<< HEAD
+=======
+    {/* <Search /> */}
+>>>>>>> 9f830b5b197fa453fab3a7e22502c7d6fc8f35d8
   </>
   
   )
