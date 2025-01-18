@@ -9,8 +9,13 @@ interface User{
     phone: string
 }
 
+interface NavLinks{
+    name: string,
+    url: string
+}
+
 interface props{
-    list: string[]
+    list: NavLinks[]
     deleteUser: Function
     user: User
 }
@@ -24,7 +29,9 @@ const Navbar: React.FC<props> = ({list, deleteUser, user}) => {
             </div>
             <div className="flex-1 flex">
                 {list.map((e) => {
-                    return <a href="#" className="flex-1 text-center bg-[#090D11] text-[#6AFAA8] hover:text-white  font-[400]">{e}</a>
+                    return <a 
+                    href = {e.url} 
+                    className="flex-1 text-center bg-[#090D11] text-[#6AFAA8] hover:text-white  font-[400]">{e.name}</a>
                 })}
             </div>
             <AccountDropdown deleteUser={deleteUser} user={user} />

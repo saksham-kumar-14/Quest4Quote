@@ -20,7 +20,25 @@ const BuyerDashboard: React.FC = () => {
   return (
     <>
     <BuyerHeader />
-    <Navbar user={user} deleteUser={deleteUser} list={['Dashboard', 'RFQ management', 'Search Vendors', 'Compare Quotes']} />
+    <Navbar 
+      user={user} 
+      deleteUser={deleteUser}
+      list={
+        [{
+            name: "Dashboard",
+            url: "/",
+        }, {
+            name: 'RFQ management', 
+            url: "/",
+        },{
+            name: 'Search Vendors',
+            url: "/"
+        },{
+            name: 'Compare Quotes',
+            url: "/"
+        }]
+      }
+    />
     <Search />
     <BasicDetails user={user} />
     <BuyerHistory />
