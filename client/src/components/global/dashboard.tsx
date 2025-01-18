@@ -5,7 +5,7 @@ import Register from "../UnAuthLandingPage/register";
 import Navbar from "../UnAuthLandingPage/navbar";
 import Display from "../UnAuthLandingPage/display";
 import BuyerDashboard from "../buyer-dashboard/buyer-dashboard";
-import VendorDashboard from "../vendor-dashboard/vendorDashboard";
+import VendorPersonalDashboard from "../vendor-dashboard/vendorPersonalDashboard";
 
 const Dashboard: React.FC = () => {
     
@@ -42,7 +42,7 @@ const Dashboard: React.FC = () => {
             {isLoggedIn && 
                 <div>
                     {localStorage.getItem('endPt') == 'buyer' && <BuyerDashboard />}
-                    {localStorage.getItem('endPt') == 'vendor' && <VendorDashboard/>
+                    {localStorage.getItem('endPt') == 'vendor' && <VendorPersonalDashboard/>
                     }
                 </div>
             }

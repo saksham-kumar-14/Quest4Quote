@@ -135,7 +135,8 @@ func handleGetSpecificVendor(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{"found": "true", "id": result.ID, "name": result.Name,
-		"phone": result.PhoneNumber, "OrganizationName": result.OrganizationName, "email": result.Email})
+		"phone": result.PhoneNumber, "OrganizationName": result.OrganizationName, "email": result.Email,
+		"websiteUrl": result.WebsiteUrl, "mainAddr": result.MainAddr, "altAddr": result.AltAddr, "about": result.About})
 
 }
 
