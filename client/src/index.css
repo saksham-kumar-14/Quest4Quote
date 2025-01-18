@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+*{
+    overflow: scroll;
+}
+
 body{
     margin: 0;
 }
