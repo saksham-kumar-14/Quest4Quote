@@ -7,17 +7,15 @@ interface props{
     setUpdationBox : Function
 }
 
-interface VendorAddInfo{
-    websiteUrl: string,
-    mainAddr: string,
-    altAddr: string
+
+interface AddProduct{
+    id: string,
+    name: string
 }
 
 const VendorUpdateAccountBox: React.FC<props> = ({setUpdationBox}) => {
 
     const { user } = useAuth();
-
-    const [vendorAddInfo, setVendorAddInfo] = useState<null | VendorAddInfo>(null);
 
     const [name, setName] = useState("");
     const [orgName, setOrgName] = useState("");
@@ -26,6 +24,11 @@ const VendorUpdateAccountBox: React.FC<props> = ({setUpdationBox}) => {
     const [websiteUrl, setWebsiteUrl] = useState("");
     const [mainAddr, setMainAddr] = useState("");
     const [altAddr, setAltAddr] = useState("");
+
+    const [addedProducts, setAddedProducts] = useState<AddProduct[]>([]);
+    const [leftProducts, setLeftProducts] = useState<AddProduct[]>([]);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [inputValue, setInputValue] = useState("");
 
     useEffect(() => {
         async function getAddVendorInfo(){
@@ -40,12 +43,42 @@ const VendorUpdateAccountBox: React.FC<props> = ({setUpdationBox}) => {
             }
         }
 
+        async function getAddedProducts(){
+            let t: AddProduct[] = [];
+            let k: AddProduct[] = [];
+            const res = await axios.get("http://localhost:3001/products");
+            const data = await res.data;
+            
+            if(data){
+                data.map((e: any) => {
+                    if(e.VendorIDs.includes(user.id)){
+                        t.push({
+                            "id" : e.id,
+                            "name" : e.name
+                        })
+                    }else{
+                        k.push({
+                            "id" : e.id,
+                            "name" : e.name
+                        })
+                    }
+                })
+            }
+            setAddedProducts(t);
+            setLeftProducts(k);
+            console.log(leftProducts);
+        }
+
         if(user){
             setName(user.name);
             setOrgName(user.organizationName);
             setPhone(user.phone);
             setAbout(user.about);
-            if(user.id != null) getAddVendorInfo();
+            if(user.id != null) {
+                getAddVendorInfo();
+                getAddedProducts();
+                
+            }
         }
     }, user);
 
@@ -182,6 +215,68 @@ const VendorUpdateAccountBox: React.FC<props> = ({setUpdationBox}) => {
                 }}
                 type="submit">Submit</button>
             </form>
+
+            <div>
+                <h3>Added Products:</h3>
+                <ul>
+                    {addedProducts.map((e: AddProduct) => {
+                        return(
+                            <li>{e.name}</li>
+                        )
+                    })}
+                </ul>
+            </div>
+
+            <div>
+            <input
+                type="text"
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)} // Delay to allow click event
+                placeholder="Type to search..."
+                style={{
+                    width: "100%",
+                    padding: "10px",
+                    boxSizing: "border-box",
+                }}
+                />
+            {showDropdown && leftProducts.length > 0 && (
+        <ul
+        style={{
+            listStyle: "none",
+            margin: 0,
+            padding: "10px",
+            position: "absolute",
+            top: "100%",
+            left: 0,
+            width: "100%",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            backgroundColor: "black",
+            color: "white",
+            zIndex: 10,
+            maxHeight: "150px",
+            overflowY: "auto",
+        }}
+        >
+        {leftProducts.map((option, index) => (
+        <li
+            key={index}
+            onClick={() => alert(option.id)}
+            style={{
+            padding: "8px 10px",
+            cursor: "pointer",
+            }}
+            onMouseDown={(e) => e.preventDefault()}
+        >
+            {option.name}
+        </li>
+        ))}
+    </ul>
+    )}
+            </div>
+
+
         </div>
     )
 }

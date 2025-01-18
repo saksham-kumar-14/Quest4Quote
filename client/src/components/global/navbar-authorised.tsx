@@ -25,7 +25,7 @@ const Navbar: React.FC<props> = ({list, deleteUser, user}) => {
     return (
         <nav className="bg-[#090D11] p-3 text-white text-lg font-bold z-10 fixed top-0 left-0 w-full">
             <div className="flex items-center">
-            <div className="w-10 h-10 flex items-center justify-center cursor-pointer" onClick={() => window.location.href = '/dashboard'}>
+            <div className="w-10 h-10 flex items-center justify-center cursor-pointer" onClick={() => window.location.href = '/'}>
                 <img src="/src/assets/navbar-authorised/logo.svg" alt="Logo" className="w-8 h-8" />
             </div>
             <div className="flex-1 flex">

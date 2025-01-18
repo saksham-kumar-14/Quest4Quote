@@ -10,7 +10,7 @@ const App: React.FC = () => {
 
   return(
     <>
-    {/* <AuthProvider>
+    <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -18,8 +18,7 @@ const App: React.FC = () => {
           <Route path='/vendor/:id' element={<VendorDashboard/>} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider> */}
-    <Compare />
+    </AuthProvider> 
     </>
   
   )

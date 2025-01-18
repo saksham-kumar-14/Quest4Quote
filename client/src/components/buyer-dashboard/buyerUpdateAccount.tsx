@@ -115,7 +115,7 @@ const BuyerUpdateAccount: React.FC<props> = ({setUpdationBox}) => {
                 onClick={async (e) => {
                     e.preventDefault();
 
-                    if(await phoneExists()) {
+                    if(phone != user.phone && await phoneExists()) {
                         alert("Phone Number already exists");
 
                     }else if(!validPhone()){

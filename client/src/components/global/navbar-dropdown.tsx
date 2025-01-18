@@ -38,8 +38,8 @@ const AccountDropdown: React.FC<props> = ({deleteUser, user}) => {
 
     useEffect(()=> {
         if(updationBox == "buyer" || updationBox == "vendor"){
-            setContainerClass("relative -z-10");
-        }else setContainerClass("relative z-10");
+            setContainerClass("relative -z-1");
+        }else setContainerClass("relative z-1");
     }, [updationBox])
 
 return (
@@ -55,7 +55,7 @@ return (
             <img src="/src/assets/navbar-authorised/account.png" alt="" className="w-8 h-8" />
         </div>
         {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-52 text-center h-[250px] bg-[#090D11] shadow-lg py-2 z-20 rounded-b-[25px] mr-[-12px] z-2">
+            <div className="">
                 <a
                 onClick={() => {
                     if(user && user.type == "buyer"){
