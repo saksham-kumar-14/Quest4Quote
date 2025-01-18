@@ -1,65 +1,78 @@
 import React from "react";
 import TabBarQuote from "./compare-tab-bar";
 
-const OverallComparison: React.FC<React.ComponentState> = ({compareShow}) => {
+interface HeaderProps{
+  vendorList: string[]
+}
+
+const OverallTableHeader: React.FC<HeaderProps> = ({vendorList}) => {
+  var width = "80px_200px_150px_" + (vendorList.length * 200) + "px";
   return (
-    <div className={`p-0 border-b border-[#090D11] ${compareShow ? 'hidden' : ''}`}>
-      <TabBarQuote />
+    <div className={`text-left font-medium bg-[#1AA566] grid grid-cols-[${width}]`}>
+      <div className="p-2 py-6 text-lg border border-[#090D11] border-l-0 text-center text-[1em]">S. No.</div>
+      <div className="p-2 py-6 border text-lg border-[#090D11] text-center">Description</div>
+      <div className="p-2 py-6 border text-lg border-[#090D11] text-center">Quantity</div>
+      <div className="grid grid-rows-2">
+        <div className="text-center py-1 text-lg">
+          Vendor
+        </div>
+        <div className="grid grid-cols-2">
+          <div className="p-2 border border-[#090D11] text-center">Vendor-1</div>
+          <div className="p-2 border border-[#090D11] border-r-0 text-center">Vendor-2</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface OverallTableItemProps {
+  itemNo: number;
+  productName: string;
+  quantity: number;
+  vendorPrices: number[];
+}
+var bestTotal = 0;
+const OverallTableItem: React.FC<OverallTableItemProps> = ({itemNo, productName, quantity, vendorPrices}) => {
+  const minVendorPrice = Math.min(...vendorPrices);
+  var width2 =  "80px_200px_150px";
+  for(var i = 0; i < vendorPrices.length; i++){
+    width2 += "_200px";
+  }
+  bestTotal += minVendorPrice;
+  return (
+    <div className={`text-sm border-t text-center grid grid-cols-[${width2}]`}>
+      <div className="p-2 ">{itemNo}.</div>
+      <div className="p-2 border-l ">{productName}</div>
+      <div className="p-2 border-l ">{quantity}</div>
+      {vendorPrices.map((item, index) => (
+        <div key={index} className={`p-2 border-l grid grid-cols-[1fr_20px] ${item == minVendorPrice ? 'bg-[#6AFAA8]' : ''}`}>
+          {item}
+          {item == minVendorPrice ? <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/> : ''}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+interface ComparisonProps{
+  compareShow: React.ComponentState;
+  vendorList: string[];
+}
+
+const OverallComparison: React.FC<ComparisonProps> = ({compareShow, vendorList}) => {
+  var width = (80+200+150+vendorList.length*200) + "px";
+  return (
+    <div className={`p-0 border-b border-[#090D11] ${compareShow[0] ? 'hidden' : ''}`}>
+      <TabBarQuote compareShowState={compareShow}/>
       <div className="text-6xl text-center font-semibold mt-[5px] mb-[15px] w-full">Compare Quotes:</div>
       <div className=" table-fixed bg-slate-50 w-[100.01%] ">
         <div>
-          <div className="text-left font-medium bg-[#1AA566] grid grid-cols-[1fr_3fr_2fr_4fr]">
-            <div className="p-2 py-6 text-lg border border-[#090D11] border-l-0 text-center text-[1em]">S. No.</div>
-            <div className="p-2 py-6 border text-lg border-[#090D11] text-center">Description</div>
-            <div className="p-2 py-6 border text-lg border-[#090D11] text-center">Qty.</div>
-            <div className="grid grid-rows-2">
-              <div className="text-center py-1 text-lg">
-                Vendor
-              </div>
-              <div className="grid grid-cols-2">
-                <div className="p-2 border border-[#090D11] text-center">Vendor-1</div>
-                <div className="p-2 border border-[#090D11] border-r-0 text-center">Vendor-2</div>
-              </div>
-            </div>
-          </div>
+          <OverallTableHeader vendorList={vendorList}/>
         </div>
         <div className="w-full">
-            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
-              <div className="p-2 ">1. </div>
-              <div className="p-2 border-l ">Product-1</div>
-              <div className="p-2 border-l ">10</div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px] bg-[#6AFAA8]">
-                12500
-                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
-              </div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px]">
-                22500
-              </div>
-            </div>
-            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
-              <div className="p-2 ">2. </div>
-              <div className="p-2 border-l ">Product-2</div>
-              <div className="p-2 border-l ">21</div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px] bg-[#6AFAA8]">
-                13905
-                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
-              </div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px]">
-                22705
-              </div>
-            </div>
-            <div className="text-sm border-t text-center grid grid-cols-[1fr_3fr_2fr_2fr_2fr]">
-              <div className="p-2 ">3. </div>
-              <div className="p-2 border-l ">Product-3</div>
-              <div className="p-2 border-l ">8</div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px]">
-                25632
-              </div>
-              <div className="p-2 border-l grid grid-cols-[1fr_20px] bg-[#6AFAA8]">
-                10985
-                <img src="/src/assets/quote-details/chevron-down.png" alt="" className="w-4 h-4"/>
-              </div>
-            </div>
+            <OverallTableItem itemNo={1} productName="Product-1" quantity={10} vendorPrices={[12500, 22500]} />
+            <OverallTableItem itemNo={2} productName="Product-2" quantity={21} vendorPrices={[13905, 22705]} />
+            <OverallTableItem itemNo={3} productName="Product-3" quantity={8} vendorPrices={[25632, 10985]} />
             <div className="text-sm border-t text-center bg-white grid grid-cols-[4fr_2fr_2fr_2fr]">
               <div className="p-2 border-l">Total</div>
               <div className="p-2 border-l">39</div>
