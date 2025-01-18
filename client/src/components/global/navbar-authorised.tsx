@@ -2,6 +2,7 @@ import React from 'react';
 import AccountDropdown from './navbar-dropdown';
 
 interface User{
+    name: string,
     email: string,
     type: string,
     id: string,

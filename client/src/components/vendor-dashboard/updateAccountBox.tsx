@@ -1,6 +1,7 @@
-import React from "react"
+import React from "react";
+import axios from 'axios';
 
-const updateAccountBox:React.FC = ({ user }) => {
+const vendorUpdateAccountBox:React.FC = () => {
 
     function updateDetails(){
 
@@ -9,6 +10,10 @@ const updateAccountBox:React.FC = ({ user }) => {
     return(
         <div>
             <form>
+                <input type="text" placeholder="Name" />
+                <input type="text" placeholder="Phone" />
+                <input type="text"
+                placeholder="organizationName"/>
                 <input type="text"  placeholder="Main Company Address"/>
                 <input type="text"  placeholder="Alternative Company Address"/>
                 <input type="text" placeholder="website url" />
@@ -16,7 +21,7 @@ const updateAccountBox:React.FC = ({ user }) => {
                 <button
                 onClick={(e) => {
                     e.preventDefault();
-                    updateDetails
+                    updateDetails();
                 }}
                 type="submit"
                 >
@@ -28,4 +33,4 @@ const updateAccountBox:React.FC = ({ user }) => {
     )
 }
 
-export default updateAccountBox;
+export default vendorUpdateAccountBox;

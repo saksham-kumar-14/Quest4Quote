@@ -11,7 +11,11 @@ interface Vendor{
     name: string,
     email: string,
     phone: string,
-    OrganizationName: string
+    OrganizationName: string,
+    mainAddr: string,
+    altAddr: string,
+    websiteUrl: string,
+    about: string
 }
 
 
@@ -22,6 +26,7 @@ const VendorDashboard:React.FC = () => {
     const { id } = useParams<{id : string}>();
     const [vendor, setVendor] = useState<Vendor | null>();
     const [found, setFound] = useState<Boolean>(false);
+
 
     useEffect(() => {
 
@@ -42,19 +47,22 @@ const VendorDashboard:React.FC = () => {
                     name: data.name,
                     phone: data.phone,
                     OrganizationName: data.OrganizationName,
-                    email: data.email
+                    email: data.email,
+                    websiteUrl: data.websiteUrl,
+                    about: data.about,
+                    mainAddr: data.mainAddr,
+                    altAddr: data.altAddr
                 })
             }
         }
-
-        if(user && user.type == "buyer") operateId();
+        operateId();
     }, [user, id]);
 
     return(
         <div>
             {found &&
             <div>
-                {user.type == "buyer" && 
+            {
                 <Navbar user={user} deleteUser={deleteUser} list={
                     [{
                         name: "Dashboard",
@@ -69,26 +77,9 @@ const VendorDashboard:React.FC = () => {
                         name: 'Compare Quotes',
                         url: "/"
                     }]
-                }/>}
-                {user.type == "vendor" &&
-                <Navbar user={user} deleteUser={deleteUser} 
-                list={
-                    [{
-                        name: "Dashboard",
-                        url: "/",
-                    }, {
-                        name: 'Product management', 
-                        url: "/",
-                    },{
-                        name: 'Received Inquiries',
-                        url: "/"
-                    },{
-                        name: 'Review & Ratings',
-                        url: "/"
-                    }]
-                }
+                }/>
+            }
                 
-                />}
                 <div className="grid grid-cols-2 mt-[75px]">
                     <div>
                         <h2>Organization Details</h2>
