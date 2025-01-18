@@ -4,6 +4,7 @@ import { useAuth } from "../../Context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BuyerChat from "../buyer-dashboard/buyerChat";
+import Navbar from "../global/navbar-authorised";
 
 interface Vendor{
     id: string,
@@ -17,7 +18,7 @@ interface Vendor{
 const VendorDashboard:React.FC = () => {
 
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, deleteUser } = useAuth();
     const { id } = useParams<{id : string}>();
     const [vendor, setVendor] = useState<Vendor | null>();
     const [found, setFound] = useState<Boolean>(false);
@@ -31,8 +32,10 @@ const VendorDashboard:React.FC = () => {
                 }
             });
             const data = await res.data;
-            if(data == null || data.found == 'false') setFound(false);
-            else{
+            if(data == null || data.found == 'false') {
+                navigate("/")
+                setFound(false);
+            }else{
                 setFound(true);
                 setVendor({
                     id: data.id,
@@ -49,16 +52,80 @@ const VendorDashboard:React.FC = () => {
 
     return(
         <div>
-            {vendor != null &&
-            <div className="grid grid-cols-2">
-                <div>
-                    <p>Name: {vendor.name}</p>
-                    <p>Email: {vendor.email}</p>
-                    <p>Phone: {vendor.phone}</p>
-                    <p>Organization Name: {vendor.OrganizationName}</p>
-                </div>
+            {found &&
+            <div>
+                {user.type == "buyer" && 
+                <Navbar user={user} deleteUser={deleteUser} list={
+                    [{
+                        name: "Dashboard",
+                        url: "/",
+                    }, {
+                        name: 'RFQ management', 
+                        url: "/",
+                    },{
+                        name: 'Search Vendors',
+                        url: "/"
+                    },{
+                        name: 'Compare Quotes',
+                        url: "/"
+                    }]
+                }/>}
+                {user.type == "vendor" &&
+                <Navbar user={user} deleteUser={deleteUser} 
+                list={
+                    [{
+                        name: "Dashboard",
+                        url: "/",
+                    }, {
+                        name: 'Product management', 
+                        url: "/",
+                    },{
+                        name: 'Received Inquiries',
+                        url: "/"
+                    },{
+                        name: 'Review & Ratings',
+                        url: "/"
+                    }]
+                }
+                
+                />}
+                <div className="grid grid-cols-2 mt-[75px]">
+                    <div>
+                        <h2>Organization Details</h2>
+                        <p>
+                            <strong>Name: </strong>
+                            {vendor.OrganizationName}
+                        </p>
+                        <p>
+                            <strong>Main Address: </strong>
+                        </p>
+                        <p>
+                            <strong>Alternative Address: </strong>
+                        </p>
+                    </div>
 
-                <BuyerChat/>
+                    <div>
+                        <h2>Contact Details</h2>
+                        <p>
+                            <strong>e-mail address:</strong>
+                            {vendor.email}
+                        </p>
+                        <p>
+                            <strong>Phone No. :</strong>
+                            {vendor.phone}
+                        </p>
+                        <p>
+                            <strong>Webiste: </strong>
+
+                        </p>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2">
+                    <div>
+                        <h2 className="font-bold text-4xl underline">About :</h2>
+                    </div>
+                    <BuyerChat />
+                </div>
             </div>
             }
 
