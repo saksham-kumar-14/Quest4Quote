@@ -1,19 +1,19 @@
 import React from 'react';
 import { Routes, Route, BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './Context/AuthContext';
-import Dashboard from './components/global/dashboard';
-import BuyerSearch from './components/buyer-dashboard/buyerSearch';
+// import Dashboard from './components/global/dashboard';
+// import BuyerSearch from './components/buyer-dashboard/buyerSearch';
 // import RFQManagement from './components/rfq-management/rfq-main';
-import VendorDashboard from './components/vendor-dashboard/vendorDashboard';
+// import VendorDashboard from './components/vendor-dashboard/vendorDashboard';
 // import Quotes from './components/quote-details/quote-main';
-// import Compare from './components/compare-quotes/compare-main';
+import Compare from './components/compare-quotes/compare-main';
 // import Search from './components/search-vendors/search-main';
 
 const App: React.FC = () => {
 
   return(
     <>
-    <AuthProvider>
+    {/* <AuthProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -21,8 +21,8 @@ const App: React.FC = () => {
           <Route path='/vendor/:id' element={<VendorDashboard/>} />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
-    {/* <Search /> */}
+    </AuthProvider> */}
+    <Compare />
   </>
   
   )
